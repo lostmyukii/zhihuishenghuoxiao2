@@ -19,6 +19,27 @@
 | 串口波特率 | `115200` |
 | 首选路线 | HTTPS Dashboard Web Serial + WSS Relay + MQTT |
 | MQTT topic 前缀 | `smartlife/primary/hk2/n16r8` |
+| GitHub 仓库 | `https://github.com/lostmyukii/zhihuishenghuoxiao2.git` |
+
+## GitHub 同步要求
+
+用户要求“每一步更新 GitHub”。本项目后续开发必须按小步提交执行：
+
+1. 每开始一个可验证步骤前，先确认 `git status --short --branch`。
+2. 每完成一个步骤，立即只提交本步骤相关文件，并推送到 `origin/main`。
+3. 每次提交信息要说明本步完成了什么，例如 `Update development workflow docs`、`Add firmware protocol skeleton`。
+4. 如果本地有不属于当前步骤的改动，不要顺手提交；先确认这些改动是否属于本步骤。
+5. 如果 `git push` 失败，停止继续开发，先处理同步问题，避免本地和 GitHub 状态分叉。
+6. 不要把 API key、MQTT 密码、Wi-Fi 密码、服务器密码写入提交。
+
+推荐每一步使用：
+
+```bash
+git status --short --branch
+git add <本步骤文件>
+git commit -m "<本步骤说明>"
+git push origin main
+```
 
 ## 不要偏离的设计主线
 
