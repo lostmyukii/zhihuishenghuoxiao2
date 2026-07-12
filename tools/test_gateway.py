@@ -1,11 +1,26 @@
 #!/usr/bin/env python3
 import unittest
 
-from n16r8_gateway import MockBoardState, PROFILE_ID, PROJECT
+from n16r8_gateway import MockBoardState, PROFILE_ID, PROJECT, prepare_serial_board
 from ws_json import PROTOCOL_TOPIC_PREFIX, is_protocol_frame, topic_for_frame
 
 
 class GatewayContractTest(unittest.TestCase):
+    def test_real_serial_prepare_releases_ch340_reset_lines(self):
+        class FakeSerial:
+            dtr = True
+            rts = False
+            reset_calls = 0
+
+            def reset_input_buffer(self):
+                self.reset_calls += 1
+
+        board = FakeSerial()
+        prepare_serial_board(board, reset_delay=0)
+        self.assertFalse(board.dtr)
+        self.assertFalse(board.rts)
+        self.assertEqual(board.reset_calls, 1)
+
     def test_identity_and_topic_are_hk2(self):
         board = MockBoardState()
         hello = board.hello()

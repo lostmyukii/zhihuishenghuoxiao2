@@ -215,6 +215,15 @@ def choose_serial_port(requested: Optional[str]) -> str:
         raise RuntimeError("no serial port found; pass --serial-port or use --mock-board") from exc
 
 
+def prepare_serial_board(board: Any, reset_delay: float = 0.12) -> None:
+    """Release CH340 control lines and hard-reset into the normal application."""
+    board.dtr = False
+    board.rts = True
+    time.sleep(reset_delay)
+    board.rts = False
+    board.reset_input_buffer()
+
+
 async def mock_board_loop(relay: JsonRelayServer) -> None:
     board = MockBoardState()
     await relay.broadcast_json(board.hello(), retain=True)
@@ -268,6 +277,7 @@ async def run_gateway(args: argparse.Namespace) -> None:
         raise RuntimeError("pyserial is not installed; use --mock-board or install pyserial")
     port_name = choose_serial_port(args.serial_port)
     board = serial.Serial(port_name, args.baud, timeout=0.1)
+    prepare_serial_board(board)
     print(f"serial connected: {port_name} baud={args.baud}")
     await asyncio.gather(serial_read_loop(relay, board), serial_command_loop(relay, board))
 
