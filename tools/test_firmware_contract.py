@@ -38,6 +38,7 @@ class FirmwareContractTest(unittest.TestCase):
         self.assertIn("board_build.partitions = default_16MB.csv", config)
         self.assertIn("board_upload.flash_size = 16MB", config)
         self.assertIn("-D BOARD_HAS_PSRAM", config)
+        self.assertIn("-D ARDUINO_USB_CDC_ON_BOOT=0", config)
 
     def test_serial_protocol_identity_matches_docs(self):
         source = self.read_source()
