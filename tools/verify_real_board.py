@@ -29,7 +29,9 @@ def main() -> None:
     hello: Dict[str, Any] | None = None
     telemetry: Dict[str, Any] | None = None
     acknowledgements: list[Dict[str, Any]] = []
-    invalid_lines = 0
+    boot_lines = 0
+    post_protocol_invalid_lines = 0
+    protocol_started = False
     command_sent = False
     restored_home = False
 
@@ -47,13 +49,20 @@ def main() -> None:
                 continue
             line = raw.decode("utf-8", errors="replace").strip()
             if not line.startswith("{"):
-                invalid_lines += 1
+                if protocol_started:
+                    post_protocol_invalid_lines += 1
+                else:
+                    boot_lines += 1
                 continue
             try:
                 frame = json.loads(line)
             except json.JSONDecodeError:
-                invalid_lines += 1
+                if protocol_started:
+                    post_protocol_invalid_lines += 1
+                else:
+                    boot_lines += 1
                 continue
+            protocol_started = True
             frame_type = frame.get("type")
             if frame_type == "hello":
                 hello = frame
@@ -69,8 +78,15 @@ def main() -> None:
                     board.write(b'{"type":"command","mode":"home"}\n')
                     board.flush()
                     restored_home = True
-                elif frame.get("message") == "mode=home" and telemetry:
-                    break
+            if (
+                restored_home
+                and any(frame.get("message") == "mode=home" for frame in acknowledgements)
+                and telemetry
+                and telemetry.get("mode") == "home"
+                and (telemetry.get("health") or {}).get("dht") == "ok"
+                and int((telemetry.get("health") or {}).get("uptimeMs") or 0) >= 2500
+            ):
+                break
 
     if hello is None:
         raise SystemExit("FAIL: no hello frame received after hardware reset")
@@ -92,7 +108,7 @@ def main() -> None:
     print(f"hello OK: firmware={hello.get('firmware')} pins={pins}")
     print(f"telemetry OK: {compact(telemetry)}")
     print(f"ack OK: {[frame.get('message') for frame in acknowledgements]}")
-    print(f"serial cleanliness: ignored_non_json_lines={invalid_lines}")
+    print(f"serial cleanliness: boot_lines={boot_lines} post_protocol_invalid_lines={post_protocol_invalid_lines}")
 
 
 if __name__ == "__main__":
