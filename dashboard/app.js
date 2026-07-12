@@ -230,17 +230,34 @@
       log("浏览器不支持 Web Serial", "error");
       return;
     }
+    let port = null;
     try {
       await disconnectMock();
-      const port = await navigator.serial.requestPort();
+      port = await navigator.serial.requestPort();
       await port.open({ baudRate: 115200 });
+      $("#connection-help").textContent = "正在释放 CH340 控制线并启动 N16R8…";
+      await HK2SerialCore.prepareCh340Port(port);
       state.serialPort = port;
       state.serialWriter = port.writable.getWriter();
-      log("USB 串口已打开，等待 hello / telemetry");
+      state.lastFrameAt = 0;
+      state.lastTelemetryAt = 0;
+      state.frameCount = 0;
+      $("#connection-help").textContent = "CH340 已启动，正在等待真实 hello / telemetry。";
+      log("USB 串口已打开并释放 RTS/DTR，等待 hello / telemetry");
       render();
       readSerialLoop();
+      setTimeout(() => {
+        if (state.serialPort === port && !isBoardFresh()) {
+          $("#connection-help").textContent = "已连接串口但 3.5 秒没有数据：请点击断开后重新连接，不要同时打开串口监视器。";
+          log("串口已连接，但没有收到 hello / telemetry", "error");
+        }
+      }, FRESH_MS);
     } catch (error) {
+      if (port && port !== state.serialPort) {
+        try { await port.close(); } catch (_) { /* best effort */ }
+      }
       log(`串口连接失败：${error.message}`, "error");
+      $("#connection-help").textContent = `串口连接失败：${error.message}`;
     }
   }
 
