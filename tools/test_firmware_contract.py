@@ -1,4 +1,3 @@
-import re
 import unittest
 from pathlib import Path
 
@@ -6,6 +5,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FIRMWARE_SOURCE = ROOT / "firmware" / "src" / "main.cpp"
 PLATFORMIO_INI = ROOT / "firmware" / "platformio.ini"
+SYNC_FILES = [
+    ROOT / "AGENTS.md",
+    ROOT / "设计方案.md",
+    ROOT / "开发文档.md",
+    ROOT / "assets" / "n16r8-hk2-wiring-diagram.svg",
+]
 
 
 class FirmwareContractTest(unittest.TestCase):
@@ -52,14 +57,16 @@ class FirmwareContractTest(unittest.TestCase):
 
         expected_pins = {
             "PIN_LIGHT": 1,
+            "PIN_MQ2": 2,
             "PIN_SOUND": 4,
             "PIN_PIR": 5,
             "PIN_FLAME": 11,
+            "PIN_WATER": 8,
             "PIN_BUZZER": 13,
             "PIN_DHT": 14,
             "PIN_OLED_SDA": 41,
             "PIN_OLED_SCL": 42,
-            "PIN_LAMP": 48,
+            "PIN_LAMP": 12,
         }
         for name, value in expected_pins.items():
             with self.subTest(pin=name):
@@ -83,6 +90,7 @@ class FirmwareContractTest(unittest.TestCase):
             "PIN_FAN_DIR",
             "PIN_SERVO",
             "PIN_RGB",
+            "PIN_KEYPAD",
             'emitPin("fanPwm"',
             'emitPin("fanDir"',
             'emitPin("servo"',
@@ -95,8 +103,35 @@ class FirmwareContractTest(unittest.TestCase):
             with self.subTest(token=token):
                 self.assertNotIn(token, source)
 
-    def test_stage_two_modes_and_handlers_exist(self):
+    def test_stable_sampling_and_oled_are_present(self):
         source = self.read_source()
+        config = self.read_platformio()
+
+        for dependency in [
+            "adafruit/DHT sensor library@1.4.6",
+            "adafruit/Adafruit GFX Library@1.12.1",
+            "adafruit/Adafruit SSD1306@2.5.13",
+        ]:
+            with self.subTest(dependency=dependency):
+                self.assertIn(dependency, config)
+
+        for token in [
+            "FAST_SENSOR_INTERVAL_MS = 200",
+            "DHT_INTERVAL_MS = 2000",
+            "DHT_STALE_MS = 6000",
+            "readFastSensors",
+            "readDhtSensor",
+            "sensors.dhtValid",
+            "Wire.begin(PIN_OLED_SDA, PIN_OLED_SCL)",
+            "oled.begin(SSD1306_SWITCHCAPVCC, OLED_ADDRESS, false, false)",
+            "renderOled",
+        ]:
+            with self.subTest(token=token):
+                self.assertIn(token, source)
+
+    def test_protocol_handlers_and_modes_exist(self):
+        source = self.read_source()
+        protocol_text = source.replace(r'\"', '"')
 
         for symbol in [
             "emitHello",
@@ -104,8 +139,8 @@ class FirmwareContractTest(unittest.TestCase):
             "emitAck",
             "handleCommandLine",
             "applyAutomation",
-            "readSensors",
-            "writeActuators",
+            "readFastSensors",
+            "readDhtSensor",
         ]:
             with self.subTest(symbol=symbol):
                 self.assertRegex(source, rf"\b{symbol}\b")
@@ -117,10 +152,52 @@ class FirmwareContractTest(unittest.TestCase):
             '"energy"',
             "lightThreshold",
             "temperatureThreshold",
+            "soundThreshold",
+            "mq2Threshold",
             "buzzerEnabled",
+            '"actuator"',
+            "MANUAL_OVERRIDE_MS = 10000",
+        ]:
+            with self.subTest(token=token):
+                self.assertIn(token, protocol_text)
+
+    def test_safety_alerts_override_manual_buzzer_off(self):
+        source = self.read_source()
+        protocol_text = source.replace(r'\"', '"')
+
+        self.assertIn("if (anyAlert())", source)
+        self.assertIn("setBuzzer(buzzerEnabled)", source)
+        self.assertIn("if (!anyAlert() || requested) setBuzzer(requested)", source)
+        for alert in ['"mq2"', '"flame"', '"water"', '"intrusion"']:
+            with self.subTest(alert=alert):
+                self.assertIn(alert, protocol_text)
+
+    def test_telemetry_contains_real_health_and_no_keypad_fields(self):
+        source = self.read_source()
+
+        for token in [
+            "lightRaw",
+            "soundRaw",
+            "mq2Raw",
+            "emitFloatOrNull",
+            "relaySafety",
+            "lowVoltageOnly",
+            "emitDisplay",
         ]:
             with self.subTest(token=token):
                 self.assertIn(token, source)
+
+        self.assertNotIn("thresholdFocus", source)
+        self.assertNotIn("keypad", source.lower())
+
+    def test_gpio_contract_is_synced_across_docs_and_wiring_asset(self):
+        combined = "\n".join(path.read_text(encoding="utf-8") for path in SYNC_FILES)
+
+        self.assertIn("GPIO12", combined)
+        self.assertIn("GPIO11", combined)
+        self.assertNotIn("GPIO48", combined)
+        self.assertNotIn("GPIO3 或 GPIO10", combined)
+        self.assertNotIn("GPIO3/GPIO10", combined)
 
 
 if __name__ == "__main__":

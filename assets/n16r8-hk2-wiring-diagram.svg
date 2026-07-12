@@ -70,7 +70,7 @@
       <path d="M70 94h36M75 103h26" stroke="#7b6a26" stroke-width="4"/>
       <path d="M76 68q12-25 24 0" fill="none" stroke="#edc940" stroke-width="5"/>
       <text x="88" y="120" text-anchor="middle" class="module-title">学习灯 / 继电器</text>
-      <text x="88" y="145" text-anchor="middle" class="gpio">GPIO48（低压）</text>
+      <text x="88" y="145" text-anchor="middle" class="gpio">GPIO12 / D12（低压）</text>
     </g>
     <text x="22" y="252" class="role">闭环：采集光照、温湿度和声音 → 本地判断 → 控制学习灯或短提醒 → OLED / 网页同步</text>
   </g>
@@ -123,7 +123,7 @@
 
   <g transform="translate(548,408)">
     <rect width="1104" height="250" rx="22" fill="#fff8ee" stroke="#e58a24" stroke-width="3"/>
-    <text x="20" y="36" class="zone-title" fill="#bf6813">4. 中控区（显示 / 输入 / 通信）</text>
+    <text x="20" y="36" class="zone-title" fill="#bf6813">4. 中控区（显示 / 控制 / 通信）</text>
     <g transform="translate(20,55)" filter="url(#shadow)">
       <rect class="card" width="245" height="150" stroke="#efb16c"/>
       <rect x="49" y="24" width="147" height="74" rx="8" fill="#14324a" stroke="#4c83a8" stroke-width="4"/>
@@ -134,12 +134,12 @@
     </g>
     <g transform="translate(285,55)" filter="url(#shadow)">
       <rect class="card" width="245" height="150" stroke="#efb16c"/>
-      <g fill="#40526b">
-        <rect x="60" y="26" width="30" height="30" rx="5"/><rect x="107" y="26" width="30" height="30" rx="5"/><rect x="154" y="26" width="30" height="30" rx="5"/>
-        <rect x="60" y="65" width="30" height="30" rx="5"/><rect x="107" y="65" width="30" height="30" rx="5"/><rect x="154" y="65" width="30" height="30" rx="5"/>
-      </g>
-      <text x="123" y="119" text-anchor="middle" class="module-title">8 键 AD（先标定）</text>
-      <text x="123" y="142" text-anchor="middle" class="gpio">GPIO3 或 GPIO10</text>
+      <rect x="45" y="25" width="155" height="72" rx="9" fill="#f8fbff" stroke="#587fa8" stroke-width="3"/>
+      <rect x="58" y="38" width="48" height="18" rx="5" fill="#69d5a2"/>
+      <rect x="115" y="38" width="72" height="18" rx="5" fill="#9dc5ed"/>
+      <rect x="58" y="66" width="129" height="17" rx="5" fill="#e6eef7"/>
+      <text x="123" y="119" text-anchor="middle" class="module-title">Dashboard 控制</text>
+      <text x="123" y="142" text-anchor="middle" class="gpio">模式 / 阈值 / 语音</text>
     </g>
     <g transform="translate(550,55)" filter="url(#shadow)">
       <rect class="card" width="280" height="150" stroke="#efb16c"/>
@@ -174,7 +174,7 @@
       <text x="1140" y="35" text-anchor="middle" class="flow">OLED + Dashboard</text><text x="1140" y="61" text-anchor="middle" class="small">hello / telemetry / ack</text>
       <path d="M1290 41h70" class="signal"/>
       <rect x="1370" width="190" height="82" rx="14" fill="#eef6ff" stroke="#7caee5" stroke-width="2"/>
-      <text x="1465" y="35" text-anchor="middle" class="flow">WSS / MQTT</text><text x="1465" y="61" text-anchor="middle" class="small">远程查看与控制</text>
+      <text x="1465" y="35" text-anchor="middle" class="flow">WSS / MQTT</text><text x="1465" y="61" text-anchor="middle" class="small">实板成功后接入</text>
     </g>
     <text x="28" y="166" class="warning">接线前断电；所有 GND 共地；继电器只接低压演示灯，不接 220V。</text>
   </g>

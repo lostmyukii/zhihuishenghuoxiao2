@@ -17,7 +17,7 @@
 | project | `smartlife-primary-hk2` |
 | profileId | `smartlife-primary-safe-energy-home-v1` |
 | 串口波特率 | `115200` |
-| 首选路线 | HTTPS Dashboard Web Serial + WSS Relay + MQTT |
+| 首选路线 | 第一阶段本地 Dashboard + Web Serial；验证后再接 WSS Relay + MQTT |
 | MQTT topic 前缀 | `smartlife/primary/hk2/n16r8` |
 | GitHub 仓库 | `https://github.com/lostmyukii/zhihuishenghuoxiao2.git` |
 
@@ -45,7 +45,7 @@ git push origin main
 
 - 评委必须能看到：生活问题、实体模块、OLED、网页状态同步。
 - 真实板必须输出 `hello/telemetry/health/ack` 类 JSON，不用静态占位数据冒充在线。
-- 同一套命令要被网页按钮、语音意图、8 键 AD 或本地按钮复用。
+- 同一套命令要被网页按钮、语音意图和文本快捷命令复用。
 - 小学组重点是四项任务闭环，不是越多模块越好。
 - MQ-2、水滴、火焰和 PIR 已纳入正式安全感知范围，不再作为可删减扩展。
 - MQTT 和可视化是展示增强，必须服务于真实硬件状态。
@@ -58,7 +58,6 @@ git push origin main
 | --- | --- | --- |
 | Light 光敏 | `GPIO1 / ADC1` | 数据采集、光暗开灯、节能判断 |
 | MQ-2 AO | `GPIO2 / ADC2` | 厨房烟雾/燃气风险 |
-| 8-key AD | `GPIO3` 或 `GPIO10` | 模式与阈值，必须实板标定 |
 | Sound 声音 | `GPIO4 / ADC4` | 学习噪声提醒 |
 | PIR | `GPIO5 / D5` | 有人/无人、离家入侵 |
 | Flame 火焰模拟 | `GPIO11` 信号口 | `DO/SIG` 低电平触发，不用明火 |
@@ -66,34 +65,11 @@ git push origin main
 | Buzzer 蜂鸣器 | `GPIO13 / D13` | 短提醒与报警 |
 | DHT | `GPIO14 / D14` | 温湿度舒适判断 |
 | OLED | `SDA=GPIO41, SCL=GPIO42` | 本地数据显示 |
-| Relay/Lamp | `GPIO48` | 低压学习灯 |
+| Relay/Lamp | `GPIO12 / D12` | 低压学习灯 |
 
 重要：命名和 GPIO 不得在 `设计方案.md`、`开发文档.md`、固件、Dashboard、图片说明之间漂移。
 
-## 8 键 AD 特别规则
-
-当前资料存在两种口径：
-
-- `N16R8_SmartHome/HARDWARE_GUIDE.md`：`ADC3 / GPIO3`
-- `N16R8/04.豪华阶段/03.8键AD键盘测试/03_8key.py`：`ADC(Pin(10))`
-
-因此不要盲写死。必须先跑单模块例程，确认实板插槽读数，再把最终 GPIO 和 ADC 区间同步到：
-
-- `开发文档.md`
-- 固件 `PIN_KEYPAD`
-- Dashboard 阈值焦点说明
-- Blockly 或教学材料
-
-默认按键语义：
-
-| 键 | 功能 |
-| --- | --- |
-| A | `study` 学习 |
-| B | `home` 或备用 |
-| C | `away` 离家 |
-| D | `energy` 节能 |
-| 左/右 | 切换阈值焦点 |
-| 上/下 | 调整当前阈值 |
+本作品确认不使用 8 键 AD、风扇、舵机和 RGB 灯环。模式与阈值由 Dashboard、语音意图和文本快捷命令完成，不得在后续固件、图片或讲稿中重新加入这些模块。
 
 ## 安全合同
 
@@ -179,7 +155,7 @@ N16R8 USB -> HTTPS Dashboard Web Serial -> WSS Cloud Relay -> MQTT Broker -> oth
 ## Dashboard 要求
 
 - 首屏是实时操作台，不是介绍页。
-- 顶部显示开发板、USB、WSS、MQTT、语音状态。
+- 顶部显示开发板、USB、语音状态；第一阶段 WSS、MQTT 明确显示“未配置”。
 - 显示四个模式：`home`、`study`、`away`、`energy`。
 - 显示传感器：light、sound、temperature、humidity、pir、mq2、water、flame。
 - 显示执行器：lamp、buzzer，并同步 OLED 显示内容。
@@ -193,9 +169,9 @@ N16R8 USB -> HTTPS Dashboard Web Serial -> WSS Cloud Relay -> MQTT Broker -> oth
 1. 冻结硬件和协议合同。
 2. 固件实现最小闭环：`hello`、`telemetry`、`ack`、光照、DHT、PIR、学习灯、蜂鸣器。
 3. 完成正式安全模块：MQ-2、水滴、火焰及 OLED/网页告警说明。
-4. 增加 8 键 AD，先标定再接入。
-5. 复用初中 Dashboard/Web Serial/WSS/MQTT 架构，改 topic 与 profile。
-6. 增加语音白名单。
+4. 完成本地 Dashboard、Web Serial 与 mock board 验证。
+5. 增加语音白名单并完成实板闭环。
+6. 实板验证成功后，再接 WSS/MQTT 云端链路。
 7. 准备 5 分钟演示脚本，按小学组四项任务讲。
 
 ## 验证命令建议
