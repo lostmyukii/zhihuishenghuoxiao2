@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#eef5f1" />
     <title>N16R8 智慧安心节能小屋</title>
-    <link rel="stylesheet" href="./style.css?v=20260712-polarity" />
+    <link rel="stylesheet" href="./style.css?v=20260712-hk2-cloud-v1" />
   </head>
   <body>
     <a class="skip-link" href="#main">跳到操作台</a>
@@ -20,9 +20,9 @@
       <div class="status-row" aria-label="连接状态">
         <span class="status-chip" id="board-status" data-state="offline"><i></i>开发板离线</span>
         <span class="status-chip" id="usb-status" data-state="offline"><i></i>USB 未连接</span>
-        <span class="status-chip" id="ws-status" data-state="offline"><i></i>Mock 未连接</span>
-        <span class="status-chip" data-state="muted"><i></i>WSS 未配置</span>
-        <span class="status-chip" data-state="muted"><i></i>MQTT 未配置</span>
+        <span class="status-chip" id="mock-status" data-state="offline"><i></i>Mock 未连接</span>
+        <span class="status-chip" id="ws-status" data-state="offline"><i></i>WSS 等待</span>
+        <span class="status-chip" id="mqtt-status" data-state="offline"><i></i>MQTT 等待</span>
         <span class="status-chip" id="voice-status" data-state="ready"><i></i>文本语音可用</span>
       </div>
     </header>
@@ -132,11 +132,12 @@ WAITING DATA...</pre>
       </aside>
     </main>
 
-    <footer>本地闭环阶段 · WSS / MQTT 将在实板验证成功后接入 · 继电器只接低压演示灯</footer>
-    <script src="./alert-core.js?v=20260712-polarity"></script>
-    <script src="./energy-core.js?v=20260712-polarity"></script>
-    <script src="./intent-core.js?v=20260712-polarity"></script>
-    <script src="./serial-core.js?v=20260712-polarity"></script>
-    <script src="./app.js?v=20260712-polarity"></script>
+    <footer>HTTPS Dashboard · Web Serial USB 网关 · WSS / MQTT 云端同步 · 继电器只接低压演示灯</footer>
+    <script src="./alert-core.js?v=20260712-hk2-cloud-v1"></script>
+    <script src="./energy-core.js?v=20260712-hk2-cloud-v1"></script>
+    <script src="./intent-core.js?v=20260712-hk2-cloud-v1"></script>
+    <script src="./serial-core.js?v=20260712-hk2-cloud-v1"></script>
+    <script src="./cloud-core.js?v=20260712-hk2-cloud-v1"></script>
+    <script src="./app.js?v=20260712-hk2-cloud-v1"></script>
   </body>
 </html>

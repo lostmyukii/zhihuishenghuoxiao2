@@ -4,6 +4,7 @@
   const EXPECTED_PROJECT = "smartlife-primary-hk2";
   const EXPECTED_PROFILE = "smartlife-primary-safe-energy-home-v1";
   const FRESH_MS = 3500;
+  const CLOUD_RECONNECT_MS = 1800;
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => [...document.querySelectorAll(selector)];
 
@@ -13,6 +14,10 @@
     serialWriter: null,
     serialReading: false,
     ws: null,
+    cloudSocket: null,
+    cloudReconnectTimer: null,
+    mqttOnline: false,
+    clientId: "",
     lastFrameAt: 0,
     lastTelemetryAt: 0,
     frameCount: 0,
@@ -25,6 +30,10 @@
     health: {},
     display: {},
   };
+
+  const cloudApi = window.HK2CloudCore;
+  const cloudEndpoint = cloudApi?.defaultEndpoint(window.location, window.location.search) || "";
+  state.clientId = cloudApi?.clientId(() => window.crypto?.randomUUID?.()) || `hk2-${Date.now()}`;
 
   function timeText(date = new Date()) {
     return date.toLocaleTimeString("zh-CN", { hour12: false });
@@ -55,6 +64,10 @@
 
   function isTelemetryFresh() {
     return state.lastTelemetryAt > 0 && Date.now() - state.lastTelemetryAt < FRESH_MS;
+  }
+
+  function cloudOpen() {
+    return Boolean(state.cloudSocket && state.cloudSocket.readyState === WebSocket.OPEN);
   }
 
   function formatSensor(key, value) {
@@ -135,7 +148,9 @@
     const boardFresh = isBoardFresh();
     setChip("#board-status", boardFresh ? "开发板在线" : "开发板离线", boardFresh ? "online" : "offline");
     setChip("#usb-status", state.serialPort ? "USB 已连接" : "USB 未连接", state.serialPort ? "online" : "offline");
-    setChip("#ws-status", state.ws?.readyState === WebSocket.OPEN ? "Mock 已连接" : "Mock 未连接", state.ws?.readyState === WebSocket.OPEN ? "online" : "offline");
+    setChip("#mock-status", state.ws?.readyState === WebSocket.OPEN ? "Mock 已连接" : "Mock 未连接", state.ws?.readyState === WebSocket.OPEN ? "online" : "offline");
+    setChip("#ws-status", cloudOpen() ? "WSS 在线" : cloudEndpoint ? "WSS 重连中" : "WSS 本地关闭", cloudOpen() ? "online" : "offline");
+    setChip("#mqtt-status", state.mqttOnline ? "MQTT 在线" : cloudOpen() ? "MQTT 离线" : "MQTT 等待", state.mqttOnline ? "online" : "offline");
     $("#last-update").textContent = boardFresh ? `${timeText(new Date(state.lastFrameAt))} 更新` : "等待第一帧";
     $("#frame-count").textContent = String(state.frameCount);
     updateMode();
@@ -161,11 +176,12 @@
   function handleFrame(frame, source = "device") {
     if (!frame || typeof frame !== "object") return;
     if (!acceptIdentity(frame)) return;
+    const frameAt = source === "cloud" && cloudApi ? cloudApi.frameTimestamp(frame) : Date.now();
     if (frame.type === "hello") {
-      state.lastFrameAt = Date.now();
+      state.lastFrameAt = frameAt;
       log(`hello · ${frame.deviceName || frame.board || "N16R8"} · 固件 ${frame.firmware || "未知"}`);
     } else if (frame.type === "telemetry") {
-      state.lastFrameAt = Date.now();
+      state.lastFrameAt = frameAt;
       state.lastTelemetryAt = state.lastFrameAt;
       state.frameCount += 1;
       state.mode = frame.mode || state.mode;
@@ -191,7 +207,9 @@
     const value = String(line || "").trim();
     if (!value) return;
     try {
-      handleFrame(JSON.parse(value), source);
+      const frame = JSON.parse(value);
+      handleFrame(frame, source);
+      if (source === "serial") sendBoardFrameToCloud(frame);
     } catch (error) {
       log(`忽略非 JSON 数据：${value.slice(0, 70)}`, "error");
     }
@@ -306,11 +324,95 @@
     render();
   }
 
-  async function sendCommand(command) {
-    const line = `${JSON.stringify(command)}\n`;
+  function sendCloudPayload(payload, origin = "dashboard") {
+    if (!cloudOpen() || !cloudApi) return false;
     try {
-      if (state.serialWriter) {
-        await state.serialWriter.write(new TextEncoder().encode(line));
+      state.cloudSocket.send(JSON.stringify(cloudApi.decoratePayload(payload, state.clientId, origin)));
+      return true;
+    } catch (error) {
+      log(`云端发送失败：${error.message}`, "error");
+      return false;
+    }
+  }
+
+  function sendBoardFrameToCloud(frame) {
+    if (!cloudApi || cloudApi.classifyPayload(frame) !== "board") return false;
+    return sendCloudPayload(frame, "web-serial-gateway");
+  }
+
+  async function writeSerialPayload(payload) {
+    if (!state.serialWriter) return false;
+    const serialPayload = cloudApi ? cloudApi.stripTransportMeta(payload) : payload;
+    await state.serialWriter.write(new TextEncoder().encode(`${JSON.stringify(serialPayload)}\n`));
+    return true;
+  }
+
+  function scheduleCloudReconnect() {
+    if (!cloudEndpoint || state.cloudReconnectTimer) return;
+    state.cloudReconnectTimer = window.setTimeout(() => {
+      state.cloudReconnectTimer = null;
+      connectCloud();
+    }, CLOUD_RECONNECT_MS);
+  }
+
+  function handleCloudPayload(payload) {
+    if (!cloudApi || cloudApi.shouldIgnore(payload, state.clientId)) return;
+    const kind = cloudApi.classifyPayload(payload);
+    if (kind === "board") {
+      handleFrame(payload, "cloud");
+      return;
+    }
+    if (kind === "command" && state.serialWriter) {
+      writeSerialPayload(payload)
+        .then((written) => { if (written) log("云端命令已写入 USB，等待真实 ack"); })
+        .catch((error) => log(`云端命令写入失败：${error.message}`, "error"));
+      return;
+    }
+    if (kind === "status") {
+      state.mqttOnline = payload.mqtt === "online";
+      render();
+    }
+  }
+
+  function connectCloud() {
+    if (!cloudEndpoint || !cloudApi) return;
+    if (state.cloudSocket && [WebSocket.CONNECTING, WebSocket.OPEN].includes(state.cloudSocket.readyState)) return;
+    let socket;
+    try {
+      socket = new WebSocket(cloudEndpoint);
+    } catch (error) {
+      log(`云端 WSS 连接失败：${error.message}`, "error");
+      scheduleCloudReconnect();
+      return;
+    }
+    state.cloudSocket = socket;
+    socket.addEventListener("open", () => {
+      sendCloudPayload({ type: "ping" });
+      log("云端 WSS 已连接");
+      render();
+    });
+    socket.addEventListener("message", (event) => {
+      try { handleCloudPayload(JSON.parse(event.data)); }
+      catch (_) { log("忽略非 JSON 云端数据", "error"); }
+    });
+    socket.addEventListener("close", () => {
+      if (state.cloudSocket === socket) state.cloudSocket = null;
+      state.mqttOnline = false;
+      log("云端 WSS 已断开，正在重连", "error");
+      render();
+      scheduleCloudReconnect();
+    });
+    socket.addEventListener("error", () => {
+      state.mqttOnline = false;
+      render();
+    });
+  }
+
+  async function sendCommand(command) {
+    try {
+      const deliveredToUsb = await writeSerialPayload(command);
+      if (deliveredToUsb) {
+        sendCloudPayload({ ...command, usbWritten: true }, "web-serial-gateway");
         log(`发送 USB 命令：${JSON.stringify(command)}`);
         return true;
       }
@@ -319,7 +421,11 @@
         log(`发送 Mock 命令：${JSON.stringify(command)}`);
         return true;
       }
-      log("命令未发送：请先连接串口或本地 Mock", "error");
+      if (sendCloudPayload(command, "dashboard")) {
+        log(`发送云端命令：${JSON.stringify(command)}，等待 USB 网关与真实 ack`);
+        return true;
+      }
+      log("命令未发送：请先连接串口、本地 Mock 或云端", "error");
       return false;
     } catch (error) {
       log(`命令发送失败：${error.message}`, "error");
@@ -379,6 +485,7 @@
 
   bindEvents();
   render();
+  connectCloud();
   setInterval(render, 1000);
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("./sw.js").catch(() => {});
 })();

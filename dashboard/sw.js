@@ -1,5 +1,5 @@
-const CACHE = "hk2-dashboard-v3-polarity";
-const ASSETS = ["./", "./index.html", "./style.css", "./app.js", "./alert-core.js", "./energy-core.js", "./intent-core.js", "./serial-core.js"];
+const CACHE = "hk2-dashboard-v4-cloud";
+const ASSETS = ["./", "./index.html", "./style.css", "./app.js", "./alert-core.js", "./energy-core.js", "./intent-core.js", "./serial-core.js", "./cloud-core.js"];
 
 self.addEventListener("install", (event) => event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS))));
 self.addEventListener("activate", (event) => event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))))));
