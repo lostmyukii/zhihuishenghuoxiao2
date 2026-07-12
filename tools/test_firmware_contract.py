@@ -34,6 +34,10 @@ class FirmwareContractTest(unittest.TestCase):
         self.assertIn("framework = arduino", config)
         self.assertIn("monitor_speed = 115200", config)
         self.assertRegex(config, r"board\s*=\s*esp32-s3-devkitc-1")
+        self.assertIn("board_build.arduino.memory_type = qio_opi", config)
+        self.assertIn("board_build.partitions = default_16MB.csv", config)
+        self.assertIn("board_upload.flash_size = 16MB", config)
+        self.assertIn("-D BOARD_HAS_PSRAM", config)
 
     def test_serial_protocol_identity_matches_docs(self):
         source = self.read_source()
