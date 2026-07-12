@@ -61,7 +61,7 @@ git push origin main
 | 8-key AD | `GPIO3` 或 `GPIO10` | 模式与阈值，必须实板标定 |
 | Sound 声音 | `GPIO4 / ADC4` | 学习噪声提醒 |
 | PIR | `GPIO5 / D5` | 有人/无人、离家入侵 |
-| Flame 火焰模拟 | `GPIO6 / D6` | 火源异常模拟，不用明火 |
+| Flame 火焰模拟 | `GPIO11` 信号口 | `DO/SIG` 低电平触发，不用明火 |
 | Water 水滴 | `GPIO8 / D8` | 漏水提醒 |
 | Buzzer 蜂鸣器 | `GPIO13 / D13` | 短提醒与报警 |
 | DHT | `GPIO14 / D14` | 温湿度舒适判断 |

@@ -14,7 +14,7 @@ static const uint8_t PIN_MQ2 = 2;
 static const uint8_t PIN_KEYPAD_PRIMARY = 3;
 static const uint8_t PIN_SOUND = 4;
 static const uint8_t PIN_PIR = 5;
-static const uint8_t PIN_FLAME = 6;
+static const uint8_t PIN_FLAME = 11;
 static const uint8_t PIN_WATER = 8;
 static const uint8_t PIN_KEYPAD_ALT = 10;
 static const uint8_t PIN_BUZZER = 13;
@@ -201,7 +201,7 @@ void readSensors() {
   sensors.mq2 = analogPercent(PIN_MQ2);
   sensors.pir = digitalRead(PIN_PIR) == HIGH;
   sensors.water = digitalRead(PIN_WATER) == HIGH;
-  sensors.flame = digitalRead(PIN_FLAME) == HIGH;
+  sensors.flame = digitalRead(PIN_FLAME) == LOW;
 
   float nextTemperature = dht.readTemperature();
   float nextHumidity = dht.readHumidity();
@@ -444,7 +444,7 @@ void setupPins() {
   pinMode(PIN_MQ2, INPUT);
   pinMode(PIN_PIR, INPUT);
   pinMode(PIN_WATER, INPUT);
-  pinMode(PIN_FLAME, INPUT);
+  pinMode(PIN_FLAME, INPUT_PULLUP);
 
   pinMode(PIN_LAMP, OUTPUT);
   pinMode(PIN_BUZZER, OUTPUT);

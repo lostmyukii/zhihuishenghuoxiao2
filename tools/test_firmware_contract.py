@@ -54,6 +54,7 @@ class FirmwareContractTest(unittest.TestCase):
             "PIN_LIGHT": 1,
             "PIN_SOUND": 4,
             "PIN_PIR": 5,
+            "PIN_FLAME": 11,
             "PIN_BUZZER": 13,
             "PIN_DHT": 14,
             "PIN_OLED_SDA": 41,
@@ -67,6 +68,12 @@ class FirmwareContractTest(unittest.TestCase):
                     rf"\b{name}\s*=\s*{value}\b",
                     f"{name} must stay aligned with AGENTS.md and 开发文档.md",
                 )
+
+    def test_flame_sensor_uses_course_board_gpio11_active_low(self):
+        source = self.read_source()
+
+        self.assertIn("pinMode(PIN_FLAME, INPUT_PULLUP)", source)
+        self.assertIn("digitalRead(PIN_FLAME) == LOW", source)
 
     def test_removed_actuators_are_absent_from_firmware_contract(self):
         source = self.read_source()
