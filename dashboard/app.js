@@ -20,7 +20,7 @@
     sensors: {},
     actuators: {},
     alerts: [],
-    thresholds: { light: 35, temperature: 29, sound: 70, mq2: 55 },
+    thresholds: { light: 35, temperature: 29, sound: 70, mq2: 70 },
     energy: {},
     health: {},
     display: {},

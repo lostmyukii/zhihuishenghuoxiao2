@@ -22,7 +22,7 @@
 
   function thresholdReason(code, sensors, thresholds) {
     if (code === "mq2" && Number.isFinite(Number(sensors.mq2))) {
-      return `当前 ${Number(sensors.mq2).toFixed(0)}%，安全阈值 ${Number(thresholds.mq2 ?? 55).toFixed(0)}%。`;
+      return `当前 ${Number(sensors.mq2).toFixed(0)}%，安全阈值 ${Number(thresholds.mq2 ?? 70).toFixed(0)}%。`;
     }
     if (code === "noise" && Number.isFinite(Number(sensors.sound))) {
       return `当前 ${Number(sensors.sound).toFixed(0)}%，提醒阈值 ${Number(thresholds.sound ?? 70).toFixed(0)}%。`;

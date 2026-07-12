@@ -6,7 +6,9 @@ assert.deepEqual(normalizeAlerts(["mq2", " mq2 ", "flame", ""]), ["mq2", "flame"
 assert.equal(describeAlert("flame").source, "火焰 DO · GPIO11 · HIGH 触发");
 assert.equal(describeAlert("water").source, "水滴 · GPIO8 · LOW 触发");
 assert.equal(describeAlert("intrusion").source, "PIR · GPIO5");
-assert.match(describeAlert("mq2", { sensors: { mq2: 62 }, thresholds: { mq2: 55 } }).reason, /62%/);
+const mq2 = describeAlert("mq2", { sensors: { mq2: 72 }, thresholds: { mq2: 70 } });
+assert.match(mq2.reason, /72%/);
+assert.match(mq2.reason, /70%/);
 
 const alarm = buildPresentation(["mq2", "flame"], { fresh: true });
 assert.equal(alarm.state, "alarm");

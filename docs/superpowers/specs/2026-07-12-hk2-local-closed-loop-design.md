@@ -98,6 +98,8 @@ mq2 / flame / water / intrusion / noise / temperature
 
 安全告警时，如果 `buzzerEnabled=true`，蜂鸣器必须响。`actuator.buzzer=false` 只停止手动蜂鸣测试，不关闭自动安全告警；只有 `set.buzzerEnabled=false` 才是明确安全静音。
 
+MQ-2 上电后先预热 `60s`，预热期 `health.mq2=warming` 且不产生 `mq2` 告警。当前实板空闲基线约 `61%`，默认阈值为 `70%`；水滴、火焰和离家入侵不受 MQ-2 预热抑制。
+
 ### 5.4 手动测试
 
 Dashboard 可发送：

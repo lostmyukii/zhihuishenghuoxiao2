@@ -37,7 +37,7 @@ class MockBoardState:
             "water": False,
             "flame": False,
         }
-        self.thresholds = {"light": 35, "temperature": 29.0, "sound": 70, "mq2": 55}
+        self.thresholds = {"light": 35, "temperature": 29.0, "sound": 70, "mq2": 70}
         self.buzzer_enabled = True
         self.manual: Dict[str, Any] = {}
         self.manual_until = 0.0
@@ -48,7 +48,7 @@ class MockBoardState:
             "project": PROJECT,
             "board": "n16r8_esp32s3",
             "profileId": PROFILE_ID,
-            "firmware": "mock-0.2.0",
+            "firmware": "mock-0.2.2",
             "deviceName": "N16R8 Safe Energy Home HK2 Mock",
             "baud": 115200,
             "capabilities": ["webSerial", "dashboard", "voiceIntent", "energyScore", "oled"],
@@ -147,6 +147,7 @@ class MockBoardState:
             "health": {
                 "profileId": PROFILE_ID,
                 "dht": "ok",
+                "mq2": "ready",
                 "oled": "ready",
                 "buzzer": "enabled" if self.buzzer_enabled else "muted",
                 "relaySafety": "lowVoltageOnly",

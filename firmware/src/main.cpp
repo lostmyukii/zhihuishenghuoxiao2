@@ -17,7 +17,7 @@ namespace {
 static const char PROJECT[] = "smartlife-primary-hk2";
 static const char PROFILE_ID[] = "smartlife-primary-safe-energy-home-v1";
 static const char BOARD_ID[] = "n16r8_esp32s3";
-static const char FIRMWARE_VERSION[] = "0.2.1";
+static const char FIRMWARE_VERSION[] = "0.2.2";
 static const int BAUD_RATE = 115200;
 static const unsigned long TELEMETRY_INTERVAL_MS = 1000;
 static const unsigned long FAST_SENSOR_INTERVAL_MS = 200;
@@ -25,6 +25,7 @@ static const unsigned long DHT_INTERVAL_MS = 2000;
 static const unsigned long DHT_STALE_MS = 6000;
 static const unsigned long OLED_INTERVAL_MS = 500;
 static const unsigned long MANUAL_OVERRIDE_MS = 10000;
+static const unsigned long MQ2_WARMUP_MS = 60000;
 
 static const uint8_t PIN_LIGHT = 1;
 static const uint8_t PIN_MQ2 = 2;
@@ -78,7 +79,7 @@ struct ThresholdState {
   int lightThreshold = 35;
   float temperatureThreshold = 29.0f;
   int soundThreshold = 70;
-  int mq2Threshold = 55;
+  int mq2Threshold = 70;
 };
 
 DHT dht(PIN_DHT, DHT11);
@@ -194,7 +195,7 @@ void printBool(bool value) {
 }
 
 bool kitchenRisk() {
-  return sensors.mq2 >= thresholds.mq2Threshold || sensors.flame;
+  return (millis() >= MQ2_WARMUP_MS && sensors.mq2 >= thresholds.mq2Threshold) || sensors.flame;
 }
 
 bool leakRisk() {
@@ -223,7 +224,7 @@ bool anyReminder() {
 }
 
 String highestStatusCode() {
-  if (sensors.mq2 >= thresholds.mq2Threshold) return "MQ2";
+  if (millis() >= MQ2_WARMUP_MS && sensors.mq2 >= thresholds.mq2Threshold) return "MQ2";
   if (sensors.flame) return "FLAME";
   if (sensors.water) return "WATER";
   if (intrusionRisk()) return "INTRUSION";
@@ -239,7 +240,8 @@ String displayLine(uint8_t index) {
     case 1:
       return String("MODE:") + modeName(currentMode);
     case 2:
-      return String("L:") + sensors.light + " MQ:" + sensors.mq2;
+      return String("L:") + sensors.light + " MQ:" +
+             (millis() >= MQ2_WARMUP_MS ? String(sensors.mq2) : "WARM");
     case 3:
       return String("T:") + (sensors.dhtValid ? String(sensors.temperature, 1) : "--") + " H:" +
              (sensors.dhtValid ? String(sensors.humidity, 0) : "--");
@@ -401,7 +403,7 @@ void emitHello() {
 void emitAlerts() {
   bool printed = false;
   Serial.print("\"alerts\":[");
-  if (sensors.mq2 >= thresholds.mq2Threshold) {
+  if (millis() >= MQ2_WARMUP_MS && sensors.mq2 >= thresholds.mq2Threshold) {
     Serial.print("\"mq2\"");
     printed = true;
   }
@@ -513,6 +515,8 @@ void emitTelemetry() {
   Serial.print(PROFILE_ID);
   Serial.print("\",\"dht\":\"");
   Serial.print(sensors.dhtValid ? "ok" : "missing");
+  Serial.print("\",\"mq2\":\"");
+  Serial.print(millis() >= MQ2_WARMUP_MS ? "ready" : "warming");
   Serial.print("\",\"oled\":\"");
   Serial.print(oledReady ? "ready" : "missing");
   Serial.print("\",\"buzzer\":\"");

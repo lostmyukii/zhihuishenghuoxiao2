@@ -185,6 +185,14 @@ class FirmwareContractTest(unittest.TestCase):
             with self.subTest(alert=alert):
                 self.assertIn(alert, protocol_text)
 
+    def test_mq2_uses_real_board_warmup_and_calibrated_threshold(self):
+        source = self.read_source()
+
+        self.assertIn("MQ2_WARMUP_MS = 60000", source)
+        self.assertIn("int mq2Threshold = 70", source)
+        self.assertIn("millis() >= MQ2_WARMUP_MS", source)
+        self.assertIn('"warming"', source)
+
     def test_telemetry_contains_real_health_and_no_keypad_fields(self):
         source = self.read_source()
 
