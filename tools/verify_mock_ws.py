@@ -21,6 +21,7 @@ class WsClient:
     def __init__(self, host: str, port: int) -> None:
         self.sock = socket.create_connection((host, port), timeout=3)
         self.sock.settimeout(3)
+        self.buffer = b""
         key = base64.b64encode(os.urandom(16)).decode()
         request = (
             f"GET / HTTP/1.1\r\nHost: {host}:{port}\r\nUpgrade: websocket\r\n"
@@ -36,7 +37,9 @@ class WsClient:
         data = b""
         while marker not in data:
             data += self.sock.recv(4096)
-        return data
+        end = data.index(marker) + len(marker)
+        self.buffer = data[end:]
+        return data[:end]
 
     def send_json(self, payload: Dict[str, Any]) -> None:
         data = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode()
@@ -69,7 +72,8 @@ class WsClient:
         return json.loads(data.decode())
 
     def _recv_exact(self, size: int) -> bytes:
-        data = b""
+        data = self.buffer[:size]
+        self.buffer = self.buffer[size:]
         while len(data) < size:
             chunk = self.sock.recv(size - len(data))
             if not chunk:
@@ -97,6 +101,11 @@ def main() -> None:
     assert hello["project"] == "smartlife-primary-hk2"
     initial = client.wait_for(lambda frame: frame.get("type") == "telemetry")
     assert initial["health"]["oled"] == "ready"
+
+    client.send_json({"type": "command", "set": {"buzzerEnabled": True}})
+    client.wait_for(lambda frame: frame.get("type") == "ack")
+    client.send_json({"type": "mock", "sensors": {"light": 48, "sound": 24, "temperature": 27.2, "humidity": 55, "pir": False, "mq2": 18, "flame": False, "water": False}})
+    client.wait_for(lambda frame: frame.get("type") == "ack" and frame.get("message") == "mock=sensors")
 
     client.send_json({"type": "voiceIntent", "intent": "startStudy"})
     assert client.wait_for(lambda frame: frame.get("type") == "ack")["message"] == "mode=study"
