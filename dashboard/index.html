@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#eef5f1" />
+    <title>N16R8 智慧安心节能小屋</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到操作台</a>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">安</span>
+        <div>
+          <p class="eyebrow">小学组 · 智慧生活</p>
+          <h1>N16R8 智慧安心节能小屋</h1>
+        </div>
+      </div>
+      <div class="status-row" aria-label="连接状态">
+        <span class="status-chip" id="board-status" data-state="offline"><i></i>开发板离线</span>
+        <span class="status-chip" id="usb-status" data-state="offline"><i></i>USB 未连接</span>
+        <span class="status-chip" id="ws-status" data-state="offline"><i></i>Mock 未连接</span>
+        <span class="status-chip" data-state="muted"><i></i>WSS 未配置</span>
+        <span class="status-chip" data-state="muted"><i></i>MQTT 未配置</span>
+        <span class="status-chip" id="voice-status" data-state="ready"><i></i>文本语音可用</span>
+      </div>
+    </header>
+
+    <main id="main" class="workspace">
+      <section class="main-column" aria-label="实时数据与安全状态">
+        <article class="safety-ribbon" id="safety-ribbon" data-state="idle">
+          <div class="safety-orbit" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div>
+            <p class="eyebrow">安心状态带 · <span id="last-update">等待第一帧</span></p>
+            <h2 id="safety-title">等待 N16R8 实时数据</h2>
+            <p id="safety-summary">连接开发板或本地 mock 后，这里才显示真实状态</p>
+          </div>
+          <div class="safety-count"><strong id="alert-count">--</strong><span>当前事件</span></div>
+        </article>
+
+        <section class="panel mode-panel">
+          <div class="section-heading">
+            <div><p class="eyebrow">四项任务的控制入口</p><h2>选择小屋模式</h2></div>
+            <span class="live-note">当前：<strong id="current-mode">等待数据</strong></span>
+          </div>
+          <div class="mode-grid">
+            <button class="mode-button" data-mode="home"><span>居家</span><small>有人且暗时开灯</small></button>
+            <button class="mode-button" data-mode="study"><span>学习</span><small>照明与舒适提醒</small></button>
+            <button class="mode-button" data-mode="away"><span>离家</span><small>PIR 玄关守护</small></button>
+            <button class="mode-button" data-mode="energy"><span>节能</span><small>只在需要时亮灯</small></button>
+          </div>
+        </section>
+
+        <section class="panel sensor-panel">
+          <div class="section-heading">
+            <div><p class="eyebrow">数据采集</p><h2>8 路真实传感状态</h2></div>
+            <span class="frame-counter">帧 <strong id="frame-count">0</strong></span>
+          </div>
+          <div class="sensor-grid">
+            <article class="sensor-card" data-sensor="light"><div class="sensor-icon">☀</div><p>光照</p><strong id="sensor-light">--</strong><small>GPIO1 · %</small><div class="meter"><i id="meter-light"></i></div></article>
+            <article class="sensor-card" data-sensor="temperature"><div class="sensor-icon">温</div><p>温度</p><strong id="sensor-temperature">--</strong><small>GPIO14 · °C</small><div class="meter"><i id="meter-temperature"></i></div></article>
+            <article class="sensor-card" data-sensor="humidity"><div class="sensor-icon">湿</div><p>湿度</p><strong id="sensor-humidity">--</strong><small>GPIO14 · %</small><div class="meter"><i id="meter-humidity"></i></div></article>
+            <article class="sensor-card" data-sensor="sound"><div class="sensor-icon">声</div><p>声音</p><strong id="sensor-sound">--</strong><small>GPIO4 · %</small><div class="meter"><i id="meter-sound"></i></div></article>
+            <article class="sensor-card" data-sensor="pir"><div class="sensor-icon">人</div><p>人体</p><strong id="sensor-pir">--</strong><small>GPIO5 · PIR</small><div class="binary-dot" id="dot-pir"></div></article>
+            <article class="sensor-card" data-sensor="mq2"><div class="sensor-icon">烟</div><p>烟雾／燃气</p><strong id="sensor-mq2">--</strong><small>GPIO2 · %</small><div class="meter"><i id="meter-mq2"></i></div></article>
+            <article class="sensor-card" data-sensor="water"><div class="sensor-icon">水</div><p>漏水</p><strong id="sensor-water">--</strong><small>GPIO8 · 数字</small><div class="binary-dot" id="dot-water"></div></article>
+            <article class="sensor-card" data-sensor="flame"><div class="sensor-icon">火</div><p>火焰信号</p><strong id="sensor-flame">--</strong><small>GPIO11 · DO</small><div class="binary-dot" id="dot-flame"></div></article>
+          </div>
+        </section>
+
+        <section class="zone-strip" aria-label="小屋区域">
+          <article><b>学习区</b><span>光敏 · 声音 · DHT · 学习灯</span></article>
+          <article><b>厨卫安全区</b><span>MQ-2 · 水滴 · 火焰</span></article>
+          <article><b>玄关安防区</b><span>PIR · 蜂鸣器</span></article>
+          <article><b>中控区</b><span>N16R8 · OLED · Dashboard</span></article>
+        </section>
+      </section>
+
+      <aside class="side-column" aria-label="连接和控制">
+        <section class="panel connection-panel">
+          <div class="section-heading compact"><div><p class="eyebrow">第一步</p><h2>连接本地设备</h2></div></div>
+          <div class="connection-actions">
+            <button class="primary-button" id="connect-serial">选择串口</button>
+            <button class="secondary-button" id="connect-mock">连接本地 Mock</button>
+            <button class="text-button" id="disconnect-device">断开当前连接</button>
+          </div>
+          <p class="helper" id="connection-help">请使用 Chrome 或 Edge。真实在线只由 hello / telemetry 判定。</p>
+        </section>
+
+        <section class="energy-card">
+          <div><p class="eyebrow">节能响应</p><strong id="energy-score">-- 分</strong></div>
+          <p id="energy-reason">等待实时节能原因</p>
+        </section>
+
+        <section class="panel actuator-panel">
+          <div class="section-heading compact"><div><p class="eyebrow">10 秒临时测试</p><h2>执行器</h2></div></div>
+          <div class="actuator-row"><div><b>学习灯</b><span>继电器 · GPIO12 / D12</span></div><div class="button-pair"><button data-actuator="lamp" data-value="true">开</button><button data-actuator="lamp" data-value="false">关</button></div></div>
+          <div class="actuator-row"><div><b>蜂鸣器</b><span>报警 · GPIO13</span></div><div class="button-pair"><button data-actuator="buzzer" data-value="true">测试</button><button data-actuator="buzzer" data-value="false">停止</button></div></div>
+          <p class="helper">安全告警会覆盖“停止测试”；安全静音需使用下方明确命令。</p>
+        </section>
+
+        <section class="panel threshold-panel">
+          <div class="section-heading compact"><div><p class="eyebrow">智能控制</p><h2>阈值设置</h2></div></div>
+          <div class="threshold-grid">
+            <label>光暗阈值 <input type="number" id="threshold-light" min="0" max="100" value="35" /><span>%</span></label>
+            <label>温度阈值 <input type="number" id="threshold-temperature" min="10" max="50" step="0.5" value="29" /><span>°C</span></label>
+            <label>声音阈值 <input type="number" id="threshold-sound" min="0" max="100" value="70" /><span>%</span></label>
+            <label>MQ-2 阈值 <input type="number" id="threshold-mq2" min="0" max="100" value="55" /><span>%</span></label>
+          </div>
+          <button class="secondary-button wide" id="save-thresholds">写入 N16R8</button>
+        </section>
+
+        <section class="panel voice-panel">
+          <div class="section-heading compact"><div><p class="eyebrow">语音交互白名单</p><h2>说一句或输入文字</h2></div><button class="mic-button" id="start-speech" aria-label="开始语音识别">◉</button></div>
+          <form id="voice-form"><input id="voice-input" autocomplete="off" placeholder="例如：家里安全吗" /><button>执行</button></form>
+          <div class="quick-intents" id="quick-intents"></div>
+          <p class="voice-result" id="voice-result">文本测试随时可用</p>
+          <div class="safety-mute"><button id="mute-buzzer">明确安全静音</button><button id="unmute-buzzer">恢复安全声音</button></div>
+        </section>
+
+        <section class="panel oled-panel">
+          <div class="section-heading compact"><div><p class="eyebrow">实体同步</p><h2>OLED 镜像</h2></div><span id="oled-health">等待</span></div>
+          <pre id="oled-screen">HK2 SAFE HOME
+WAITING DATA...</pre>
+        </section>
+
+        <section class="panel log-panel">
+          <div class="section-heading compact"><div><p class="eyebrow">可核验记录</p><h2>事件日志</h2></div><button class="text-button" id="clear-log">清空</button></div>
+          <ol id="event-log"><li><time>--:--:--</time><span>页面已就绪，等待真实帧</span></li></ol>
+        </section>
+      </aside>
+    </main>
+
+    <footer>本地闭环阶段 · WSS / MQTT 将在实板验证成功后接入 · 继电器只接低压演示灯</footer>
+    <script src="./alert-core.js"></script>
+    <script src="./energy-core.js"></script>
+    <script src="./intent-core.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
