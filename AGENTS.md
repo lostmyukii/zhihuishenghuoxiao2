@@ -62,13 +62,9 @@ git push origin main
 | PIR | `GPIO5 / D5` | 有人/无人、离家入侵 |
 | Flame 火焰模拟 | `GPIO6 / D6` | 火源异常模拟，不用明火 |
 | Water 水滴 | `GPIO8 / D8` | 漏水提醒 |
-| Servo 舵机 | `GPIO9 / D9` | 窗帘模型 |
-| Fan PWM | `GPIO11 / D11` | 通风与安全排风 |
-| Fan DIR | `GPIO12 / D12` | 风扇方向，可选 |
 | Buzzer 蜂鸣器 | `GPIO13 / D13` | 短提醒与报警 |
 | DHT | `GPIO14 / D14` | 温湿度舒适判断 |
 | OLED | `SDA=GPIO41, SCL=GPIO42` | 本地数据显示 |
-| RGB ring | `GPIO47` | 状态灯、报警红灯 |
 | Relay/Lamp | `GPIO48` | 低压学习灯 |
 
 重要：命名和 GPIO 不得在 `设计方案.md`、`开发文档.md`、固件、Dashboard、图片说明之间漂移。
@@ -105,11 +101,11 @@ git push origin main
 - 不接 `220V`，继电器只接低压演示灯或指示灯。
 - MQ-2 若使用 `5V` 供电，`AO` 必须限压到 `0~3.3V`。
 - 所有外部执行器必须共地。
-- 上电默认风扇关、继电器关、蜂鸣器静音、RGB 安全色。
+- 上电默认继电器关、蜂鸣器静音；安全告警功能默认保持启用。
 - MQ-2 超阈值、水滴触发、火焰触发必须产生安全告警。
 - `away` 模式下 PIR 触发必须产生入侵告警。
 - 安全告警时，如果 `buzzerEnabled=true`，蜂鸣器应响。
-- 厨房风险应使风扇进入报警风速，RGB 变红，即使之前手动关过风扇或设置过 RGB。
+- 厨房风险应在 `buzzerEnabled=true` 时触发蜂鸣器，并让 OLED 与网页明确显示风险来源。
 - `actuator.buzzer=false` 只停止手动/测试蜂鸣，不关闭安全报警。
 - `set.buzzerEnabled=false` 才是明确安全静音，OLED 和网页必须显示 muted。
 
@@ -185,7 +181,7 @@ N16R8 USB -> HTTPS Dashboard Web Serial -> WSS Cloud Relay -> MQTT Broker -> oth
 - 顶部显示开发板、USB、WSS、MQTT、语音状态。
 - 显示四个模式：`home`、`study`、`away`、`energy`。
 - 显示传感器：light、sound、temperature、humidity、pir、mq2、water、flame。
-- 显示执行器：lamp、fan、curtain、rgb、buzzer。
+- 显示执行器：lamp、buzzer，并同步 OLED 显示内容。
 - 显示小屋热区：学习区、厨卫安全区、玄关安防区、中控区。
 - 显示日志：`hello`、`telemetry`、`ack`、`event`。
 - 断开 USB 后必须显示离线或重连中。
@@ -194,8 +190,8 @@ N16R8 USB -> HTTPS Dashboard Web Serial -> WSS Cloud Relay -> MQTT Broker -> oth
 ## 实现顺序
 
 1. 冻结硬件和协议合同。
-2. 固件实现最小闭环：`hello`、`telemetry`、`ack`、光照、DHT、PIR、灯、风扇。
-3. 增加安全扩展：MQ-2、水滴、火焰、RGB、蜂鸣器。
+2. 固件实现最小闭环：`hello`、`telemetry`、`ack`、光照、DHT、PIR、学习灯、蜂鸣器。
+3. 增加安全扩展：MQ-2、水滴、火焰及 OLED/网页告警说明。
 4. 增加 8 键 AD，先标定再接入。
 5. 复用初中 Dashboard/Web Serial/WSS/MQTT 架构，改 topic 与 profile。
 6. 增加语音白名单。

@@ -54,13 +54,10 @@ class FirmwareContractTest(unittest.TestCase):
             "PIN_LIGHT": 1,
             "PIN_SOUND": 4,
             "PIN_PIR": 5,
-            "PIN_FAN_PWM": 11,
-            "PIN_FAN_DIR": 12,
             "PIN_BUZZER": 13,
             "PIN_DHT": 14,
             "PIN_OLED_SDA": 41,
             "PIN_OLED_SCL": 42,
-            "PIN_RGB": 47,
             "PIN_LAMP": 48,
         }
         for name, value in expected_pins.items():
@@ -70,6 +67,26 @@ class FirmwareContractTest(unittest.TestCase):
                     rf"\b{name}\s*=\s*{value}\b",
                     f"{name} must stay aligned with AGENTS.md and 开发文档.md",
                 )
+
+    def test_removed_actuators_are_absent_from_firmware_contract(self):
+        source = self.read_source()
+
+        removed_tokens = [
+            "PIN_FAN_PWM",
+            "PIN_FAN_DIR",
+            "PIN_SERVO",
+            "PIN_RGB",
+            'emitPin("fanPwm"',
+            'emitPin("fanDir"',
+            'emitPin("servo"',
+            'emitPin("rgb"',
+            'Serial.print(",\\\"fan\\\":"',
+            'Serial.print(",\\\"curtain\\\":"',
+            'Serial.print(",\\\"rgb\\\":"',
+        ]
+        for token in removed_tokens:
+            with self.subTest(token=token):
+                self.assertNotIn(token, source)
 
     def test_stage_two_modes_and_handlers_exist(self):
         source = self.read_source()

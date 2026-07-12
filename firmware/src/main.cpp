@@ -16,15 +16,11 @@ static const uint8_t PIN_SOUND = 4;
 static const uint8_t PIN_PIR = 5;
 static const uint8_t PIN_FLAME = 6;
 static const uint8_t PIN_WATER = 8;
-static const uint8_t PIN_SERVO = 9;
 static const uint8_t PIN_KEYPAD_ALT = 10;
-static const uint8_t PIN_FAN_PWM = 11;
-static const uint8_t PIN_FAN_DIR = 12;
 static const uint8_t PIN_BUZZER = 13;
 static const uint8_t PIN_DHT = 14;
 static const uint8_t PIN_OLED_SDA = 41;
 static const uint8_t PIN_OLED_SCL = 42;
-static const uint8_t PIN_RGB = 47;
 static const uint8_t PIN_LAMP = 48;
 
 enum class Mode {
@@ -47,9 +43,6 @@ struct SensorState {
 
 struct ActuatorState {
   bool lamp = false;
-  int fan = 0;
-  int curtain = 45;
-  const char *rgb = "green";
   bool buzzer = false;
 };
 
@@ -151,13 +144,21 @@ bool intrusionRisk() {
   return currentMode == Mode::Away && sensors.pir;
 }
 
+bool temperatureReminder() {
+  return currentMode == Mode::Study && sensors.temperature > thresholds.temperatureThreshold;
+}
+
+bool noiseReminder() {
+  return currentMode == Mode::Study && sensors.sound > thresholds.soundThreshold;
+}
+
 bool anyAlert() {
   return kitchenRisk() || leakRisk() || intrusionRisk();
 }
 
 const char *energyReason() {
   if (kitchenRisk()) {
-    return "safety ventilation";
+    return "kitchen safety alert";
   }
   if (leakRisk()) {
     return "water alert";
@@ -166,16 +167,16 @@ const char *energyReason() {
     return "away intrusion";
   }
   if (currentMode == Mode::Energy) {
-    return "energy mode keeps lamp and fan off";
-  }
-  if (actuators.lamp && actuators.fan > 0) {
-    return "dark and hot";
+    if (!sensors.pir) {
+      return "empty room keeps study lamp off";
+    }
+    if (sensors.light >= thresholds.lightThreshold) {
+      return "enough daylight keeps study lamp off";
+    }
+    return "occupied dark room permits study lamp";
   }
   if (actuators.lamp) {
     return "dark study lamp";
-  }
-  if (actuators.fan > 0) {
-    return "temperature ventilation";
   }
   return "collecting normal data";
 }
@@ -184,9 +185,6 @@ int energyScore() {
   int score = 100;
   if (actuators.lamp) {
     score -= 12;
-  }
-  if (actuators.fan > 0) {
-    score -= 10;
   }
   if (anyAlert()) {
     score -= 20;
@@ -217,54 +215,32 @@ void readSensors() {
 
 void applyAutomation() {
   bool dark = sensors.light < thresholds.lightThreshold;
-  bool hot = sensors.temperature > thresholds.temperatureThreshold;
 
   actuators.lamp = false;
-  actuators.fan = 0;
-  actuators.curtain = 45;
-  actuators.rgb = "green";
   actuators.buzzer = false;
 
   switch (currentMode) {
     case Mode::Home:
       actuators.lamp = dark && sensors.pir;
-      actuators.fan = hot ? 45 : 0;
-      actuators.rgb = "white";
       break;
     case Mode::Study:
       actuators.lamp = dark;
-      actuators.fan = hot ? 60 : 0;
-      actuators.rgb = "blue";
       break;
     case Mode::Away:
       actuators.lamp = false;
-      actuators.fan = 0;
-      actuators.rgb = "amber";
       break;
     case Mode::Energy:
-      actuators.lamp = false;
-      actuators.fan = 0;
-      actuators.curtain = 20;
-      actuators.rgb = "green";
+      actuators.lamp = dark && sensors.pir;
       break;
   }
 
-  if (kitchenRisk()) {
-    actuators.fan = 100;
-    actuators.rgb = "red";
-  }
-  if (leakRisk() || intrusionRisk()) {
-    actuators.rgb = "red";
-  }
-  if (anyAlert() && buzzerEnabled) {
+  if ((anyAlert() || temperatureReminder() || noiseReminder()) && buzzerEnabled) {
     actuators.buzzer = true;
   }
 }
 
 void writeActuators() {
   digitalWrite(PIN_LAMP, actuators.lamp ? HIGH : LOW);
-  analogWrite(PIN_FAN_PWM, (clampPercent(actuators.fan) * 255) / 100);
-  digitalWrite(PIN_FAN_DIR, actuators.fan > 0 ? HIGH : LOW);
   digitalWrite(PIN_BUZZER, actuators.buzzer ? HIGH : LOW);
 }
 
@@ -295,15 +271,11 @@ void emitHello() {
   emitPin("pir", PIN_PIR);
   emitPin("flame", PIN_FLAME);
   emitPin("water", PIN_WATER);
-  emitPin("servo", PIN_SERVO);
   emitPin("keypadAlt", PIN_KEYPAD_ALT);
-  emitPin("fanPwm", PIN_FAN_PWM);
-  emitPin("fanDir", PIN_FAN_DIR);
   emitPin("buzzer", PIN_BUZZER);
   emitPin("dht", PIN_DHT);
   emitPin("oledSda", PIN_OLED_SDA);
   emitPin("oledScl", PIN_OLED_SCL);
-  emitPin("rgb", PIN_RGB);
   emitPin("relayLamp", PIN_LAMP, true);
   Serial.println("}}");
 }
@@ -311,8 +283,15 @@ void emitHello() {
 void emitAlerts() {
   bool printed = false;
   Serial.print("\"alerts\":[");
-  if (kitchenRisk()) {
-    Serial.print("\"kitchenRisk\"");
+  if (sensors.mq2 >= thresholds.mq2Threshold) {
+    Serial.print("\"mq2\"");
+    printed = true;
+  }
+  if (sensors.flame) {
+    if (printed) {
+      Serial.print(",");
+    }
+    Serial.print("\"flame\"");
     printed = true;
   }
   if (leakRisk()) {
@@ -327,6 +306,20 @@ void emitAlerts() {
       Serial.print(",");
     }
     Serial.print("\"intrusion\"");
+    printed = true;
+  }
+  if (noiseReminder()) {
+    if (printed) {
+      Serial.print(",");
+    }
+    Serial.print("\"noise\"");
+    printed = true;
+  }
+  if (temperatureReminder()) {
+    if (printed) {
+      Serial.print(",");
+    }
+    Serial.print("\"temperature\"");
   }
   Serial.print("]");
 }
@@ -352,13 +345,7 @@ void emitTelemetry() {
   printBool(sensors.flame);
   Serial.print("},\"actuators\":{\"lamp\":");
   printBool(actuators.lamp);
-  Serial.print(",\"fan\":");
-  Serial.print(actuators.fan);
-  Serial.print(",\"curtain\":");
-  Serial.print(actuators.curtain);
-  Serial.print(",\"rgb\":\"");
-  Serial.print(actuators.rgb);
-  Serial.print("\",\"buzzer\":");
+  Serial.print(",\"buzzer\":");
   printBool(actuators.buzzer);
   Serial.print("},");
   emitAlerts();
@@ -460,13 +447,9 @@ void setupPins() {
   pinMode(PIN_FLAME, INPUT);
 
   pinMode(PIN_LAMP, OUTPUT);
-  pinMode(PIN_FAN_PWM, OUTPUT);
-  pinMode(PIN_FAN_DIR, OUTPUT);
   pinMode(PIN_BUZZER, OUTPUT);
 
   digitalWrite(PIN_LAMP, LOW);
-  analogWrite(PIN_FAN_PWM, 0);
-  digitalWrite(PIN_FAN_DIR, LOW);
   digitalWrite(PIN_BUZZER, LOW);
 }
 

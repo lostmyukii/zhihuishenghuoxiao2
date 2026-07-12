@@ -1,0 +1,181 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="900" viewBox="0 0 1680 900">
+  <defs>
+    <style>
+      text { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; fill: #132238; }
+      .title { font-size: 42px; font-weight: 800; }
+      .subtitle { font-size: 20px; fill: #53657b; }
+      .zone-title { font-size: 25px; font-weight: 750; }
+      .module-title { font-size: 20px; font-weight: 700; }
+      .gpio { font-size: 17px; font-weight: 650; fill: #1f5ea8; }
+      .role { font-size: 15px; fill: #52657a; }
+      .small { font-size: 14px; fill: #53657b; }
+      .warning { font-size: 16px; font-weight: 700; fill: #c53b31; }
+      .flow { font-size: 18px; font-weight: 650; }
+      .card { fill: #ffffff; stroke-width: 2; rx: 14; }
+      .wire-g { stroke: #1d2430; stroke-width: 5; fill: none; }
+      .wire-v { stroke: #e14b42; stroke-width: 5; fill: none; }
+      .wire-s { stroke: #e7b325; stroke-width: 5; fill: none; }
+      .signal { stroke: #2f73c7; stroke-width: 4; fill: none; marker-end: url(#arrow); }
+    </style>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="7" flood-color="#29435f" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f73c7"/>
+    </marker>
+  </defs>
+
+  <rect width="1680" height="900" fill="#f6f9fd"/>
+  <rect x="0" y="0" width="1680" height="94" fill="#ffffff"/>
+  <text x="36" y="57" class="title">N16R8 智慧安心节能小屋 · 硬件接线图（小学组）</text>
+  <text x="38" y="84" class="subtitle">当前方案：学习灯 + 蜂鸣器 + OLED；所有信号按 3.3V 逻辑，共地连接</text>
+
+  <g transform="translate(1160,18)">
+    <rect width="480" height="60" rx="14" fill="#f8fbff" stroke="#aac6e8" stroke-width="2"/>
+    <text x="18" y="25" class="small" font-weight="700">接线图例</text>
+    <line x1="18" y1="43" x2="62" y2="43" class="wire-g"/><text x="70" y="49" class="small">G = GND</text>
+    <line x1="176" y1="43" x2="220" y2="43" class="wire-v"/><text x="228" y="49" class="small">V = 低压电源</text>
+    <line x1="352" y1="43" x2="396" y2="43" class="wire-s"/><text x="404" y="49" class="small">S = 信号</text>
+  </g>
+
+  <g transform="translate(28,112)">
+    <rect width="790" height="278" rx="22" fill="#eef6ff" stroke="#2f73c7" stroke-width="3"/>
+    <text x="20" y="36" class="zone-title" fill="#1f5ea8">1. 学习区（环境采集与节能）</text>
+
+    <g transform="translate(20,55)" filter="url(#shadow)">
+      <rect class="card" width="175" height="165" stroke="#7caee5"/>
+      <circle cx="88" cy="70" r="33" fill="#ffefb5" stroke="#dcae26" stroke-width="3"/>
+      <path d="M67 70h42M88 49v42M73 55l30 30M103 55L73 85" stroke="#9f7810" stroke-width="4"/>
+      <text x="88" y="120" text-anchor="middle" class="module-title">光敏传感器</text>
+      <text x="88" y="145" text-anchor="middle" class="gpio">GPIO1 / ADC1</text>
+    </g>
+    <g transform="translate(212,55)" filter="url(#shadow)">
+      <rect class="card" width="175" height="165" stroke="#7caee5"/>
+      <path d="M50 78h22l20-22v48L72 82H50z" fill="#6f8fb2"/>
+      <path d="M102 62q24 18 0 36M113 51q38 29 0 58" fill="none" stroke="#2f73c7" stroke-width="5"/>
+      <text x="88" y="120" text-anchor="middle" class="module-title">声音传感器</text>
+      <text x="88" y="145" text-anchor="middle" class="gpio">GPIO4 / ADC4</text>
+    </g>
+    <g transform="translate(404,55)" filter="url(#shadow)">
+      <rect class="card" width="175" height="165" stroke="#7caee5"/>
+      <rect x="58" y="32" width="59" height="70" rx="10" fill="#61b9dd" stroke="#267ba1" stroke-width="3"/>
+      <circle cx="75" cy="51" r="3" fill="#d7f3ff"/><circle cx="99" cy="51" r="3" fill="#d7f3ff"/>
+      <circle cx="75" cy="72" r="3" fill="#d7f3ff"/><circle cx="99" cy="72" r="3" fill="#d7f3ff"/>
+      <text x="88" y="120" text-anchor="middle" class="module-title">DHT 温湿度</text>
+      <text x="88" y="145" text-anchor="middle" class="gpio">GPIO14 / D14</text>
+    </g>
+    <g transform="translate(596,55)" filter="url(#shadow)">
+      <rect class="card" width="175" height="165" stroke="#7caee5"/>
+      <circle cx="88" cy="67" r="31" fill="#fff5c8" stroke="#edc940" stroke-width="4"/>
+      <path d="M70 94h36M75 103h26" stroke="#7b6a26" stroke-width="4"/>
+      <path d="M76 68q12-25 24 0" fill="none" stroke="#edc940" stroke-width="5"/>
+      <text x="88" y="120" text-anchor="middle" class="module-title">学习灯 / 继电器</text>
+      <text x="88" y="145" text-anchor="middle" class="gpio">GPIO48（低压）</text>
+    </g>
+    <text x="22" y="252" class="role">闭环：采集光照、温湿度和声音 → 本地判断 → 控制学习灯或短提醒 → OLED / 网页同步</text>
+  </g>
+
+  <g transform="translate(840,112)">
+    <rect width="812" height="278" rx="22" fill="#f1fbf4" stroke="#2c9a56" stroke-width="3"/>
+    <text x="20" y="36" class="zone-title" fill="#247c48">2. 厨卫安全区（风险采集）</text>
+    <g transform="translate(20,55)" filter="url(#shadow)">
+      <rect class="card" width="238" height="165" stroke="#78c38f"/>
+      <circle cx="119" cy="66" r="38" fill="#c8b896" stroke="#7d715a" stroke-width="4"/>
+      <path d="M90 66h58M96 50h46M96 82h46" stroke="#7d715a" stroke-width="3"/>
+      <text x="119" y="120" text-anchor="middle" class="module-title">MQ-2 烟雾 / 燃气</text>
+      <text x="119" y="145" text-anchor="middle" class="gpio">AO → 限压 → GPIO2</text>
+    </g>
+    <g transform="translate(278,55)" filter="url(#shadow)">
+      <rect class="card" width="238" height="165" stroke="#78c38f"/>
+      <path d="M119 29c-24 31-39 50-39 70a39 39 0 0 0 78 0c0-20-15-39-39-70z" fill="#82c6eb" stroke="#318bbd" stroke-width="4"/>
+      <text x="119" y="120" text-anchor="middle" class="module-title">水滴 / 漏水传感器</text>
+      <text x="119" y="145" text-anchor="middle" class="gpio">GPIO8 / D8</text>
+    </g>
+    <g transform="translate(536,55)" filter="url(#shadow)">
+      <rect class="card" width="238" height="165" stroke="#78c38f"/>
+      <path d="M119 31c18 25 34 39 30 62-4 25-22 36-30 36s-27-11-31-36c-3-18 8-34 21-48 1 15 7 22 10 25 8-13 7-27 0-39z" fill="#ff845f" stroke="#d54f35" stroke-width="4"/>
+      <text x="119" y="120" text-anchor="middle" class="module-title">火焰传感器（模拟）</text>
+      <text x="119" y="145" text-anchor="middle" class="gpio">GPIO6 / D6</text>
+    </g>
+    <text x="22" y="252" class="warning">安全：MQ-2 AO 必须限制在 0~3.3V；不用明火；异常通过蜂鸣器、OLED 与网页告警</text>
+  </g>
+
+  <g transform="translate(28,408)">
+    <rect width="500" height="250" rx="22" fill="#f7f2ff" stroke="#7b52b7" stroke-width="3"/>
+    <text x="20" y="36" class="zone-title" fill="#68449c">3. 玄关安防区</text>
+    <g transform="translate(20,55)" filter="url(#shadow)">
+      <rect class="card" width="214" height="150" stroke="#a58bd0"/>
+      <circle cx="107" cy="60" r="35" fill="#f5f2ec" stroke="#9b9b95" stroke-width="4"/>
+      <path d="M81 60q26-25 52 0M89 70q18-17 36 0" fill="none" stroke="#9b9b95" stroke-width="3"/>
+      <text x="107" y="112" text-anchor="middle" class="module-title">PIR 人体红外</text>
+      <text x="107" y="136" text-anchor="middle" class="gpio">GPIO5 / D5</text>
+    </g>
+    <g transform="translate(250,55)" filter="url(#shadow)">
+      <rect class="card" width="214" height="150" stroke="#a58bd0"/>
+      <circle cx="107" cy="60" r="34" fill="#27313d"/>
+      <circle cx="107" cy="60" r="11" fill="#111820"/>
+      <path d="M147 43q22 17 0 34M157 34q35 26 0 52" fill="none" stroke="#7b52b7" stroke-width="4"/>
+      <text x="107" y="112" text-anchor="middle" class="module-title">蜂鸣器</text>
+      <text x="107" y="136" text-anchor="middle" class="gpio">GPIO13 / D13</text>
+    </g>
+    <text x="20" y="232" class="role">离家模式检测到人体活动 → 短报警 + OLED / 网页显示来源</text>
+  </g>
+
+  <g transform="translate(548,408)">
+    <rect width="1104" height="250" rx="22" fill="#fff8ee" stroke="#e58a24" stroke-width="3"/>
+    <text x="20" y="36" class="zone-title" fill="#bf6813">4. 中控区（显示 / 输入 / 通信）</text>
+    <g transform="translate(20,55)" filter="url(#shadow)">
+      <rect class="card" width="245" height="150" stroke="#efb16c"/>
+      <rect x="49" y="24" width="147" height="74" rx="8" fill="#14324a" stroke="#4c83a8" stroke-width="4"/>
+      <text x="123" y="55" text-anchor="middle" fill="#d9f4ff" font-size="16">MODE / DATA</text>
+      <text x="123" y="80" text-anchor="middle" fill="#d9f4ff" font-size="16">ALERT / STATE</text>
+      <text x="123" y="119" text-anchor="middle" class="module-title">OLED 显示屏</text>
+      <text x="123" y="142" text-anchor="middle" class="gpio">SDA 41 / SCL 42</text>
+    </g>
+    <g transform="translate(285,55)" filter="url(#shadow)">
+      <rect class="card" width="245" height="150" stroke="#efb16c"/>
+      <g fill="#40526b">
+        <rect x="60" y="26" width="30" height="30" rx="5"/><rect x="107" y="26" width="30" height="30" rx="5"/><rect x="154" y="26" width="30" height="30" rx="5"/>
+        <rect x="60" y="65" width="30" height="30" rx="5"/><rect x="107" y="65" width="30" height="30" rx="5"/><rect x="154" y="65" width="30" height="30" rx="5"/>
+      </g>
+      <text x="123" y="119" text-anchor="middle" class="module-title">8 键 AD（先标定）</text>
+      <text x="123" y="142" text-anchor="middle" class="gpio">GPIO3 或 GPIO10</text>
+    </g>
+    <g transform="translate(550,55)" filter="url(#shadow)">
+      <rect class="card" width="280" height="150" stroke="#efb16c"/>
+      <rect x="45" y="30" width="190" height="67" rx="12" fill="#173d5c"/>
+      <rect x="64" y="47" width="152" height="30" rx="6" fill="#315d7e"/>
+      <circle cx="87" cy="62" r="7" fill="#69d5a2"/>
+      <text x="140" y="119" text-anchor="middle" class="module-title">N16R8 ESP32-S3</text>
+      <text x="140" y="142" text-anchor="middle" class="gpio">本地判断与协议中枢</text>
+    </g>
+    <g transform="translate(850,55)" filter="url(#shadow)">
+      <rect class="card" width="220" height="150" stroke="#efb16c"/>
+      <path d="M72 43h76v36H72zM88 29h44v14H88zM95 79h30v18H95z" fill="#4f6278"/>
+      <text x="110" y="119" text-anchor="middle" class="module-title">USB-C 连接电脑</text>
+      <text x="110" y="142" text-anchor="middle" class="gpio">115200 / Web Serial</text>
+    </g>
+  </g>
+
+  <g transform="translate(28,680)">
+    <rect width="1624" height="188" rx="22" fill="#ffffff" stroke="#a8bdd5" stroke-width="2"/>
+    <text x="20" y="34" class="zone-title">数据与控制闭环</text>
+    <g transform="translate(28,57)">
+      <rect width="220" height="82" rx="14" fill="#eef6ff" stroke="#7caee5" stroke-width="2"/>
+      <text x="110" y="35" text-anchor="middle" class="flow">真实传感器</text><text x="110" y="61" text-anchor="middle" class="small">GPIO / ADC 数据</text>
+      <path d="M230 41h70" class="signal"/>
+      <rect x="310" width="250" height="82" rx="14" fill="#fff8ee" stroke="#efb16c" stroke-width="2"/>
+      <text x="435" y="35" text-anchor="middle" class="flow">N16R8 本地判断</text><text x="435" y="61" text-anchor="middle" class="small">模式 / 阈值 / 安全优先</text>
+      <path d="M570 41h70" class="signal"/>
+      <rect x="650" width="260" height="82" rx="14" fill="#f7f2ff" stroke="#a58bd0" stroke-width="2"/>
+      <text x="780" y="35" text-anchor="middle" class="flow">学习灯 / 蜂鸣器</text><text x="780" y="61" text-anchor="middle" class="small">真实执行动作</text>
+      <path d="M920 41h70" class="signal"/>
+      <rect x="1000" width="280" height="82" rx="14" fill="#f1fbf4" stroke="#78c38f" stroke-width="2"/>
+      <text x="1140" y="35" text-anchor="middle" class="flow">OLED + Dashboard</text><text x="1140" y="61" text-anchor="middle" class="small">hello / telemetry / ack</text>
+      <path d="M1290 41h70" class="signal"/>
+      <rect x="1370" width="190" height="82" rx="14" fill="#eef6ff" stroke="#7caee5" stroke-width="2"/>
+      <text x="1465" y="35" text-anchor="middle" class="flow">WSS / MQTT</text><text x="1465" y="61" text-anchor="middle" class="small">远程查看与控制</text>
+    </g>
+    <text x="28" y="166" class="warning">接线前断电；所有 GND 共地；继电器只接低压演示灯，不接 220V。</text>
+  </g>
+</svg>
