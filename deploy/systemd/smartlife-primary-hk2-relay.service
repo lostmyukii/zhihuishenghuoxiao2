@@ -1,0 +1,16 @@
+[Unit]
+Description=SmartLife Primary HK2 MQTT WebSocket Relay on 19366
+After=network.target smartlife-primary-hk2-mqtt.service
+Wants=smartlife-primary-hk2-mqtt.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/smartlife-primary-hk2
+EnvironmentFile=/home/ubuntu/smartlife-primary-hk2/deploy/.env
+ExecStart=/home/ubuntu/smartlife-primary-hk2/.venv/bin/python tools/n16r8_cloud_relay.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

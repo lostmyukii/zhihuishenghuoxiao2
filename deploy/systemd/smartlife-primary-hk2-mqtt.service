@@ -1,0 +1,14 @@
+[Unit]
+Description=SmartLife Primary HK2 MQTT Broker on 19383
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/smartlife-primary-hk2
+ExecStart=/usr/sbin/mosquitto -c /home/ubuntu/smartlife-primary-hk2/deploy/mosquitto.conf
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

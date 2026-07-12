@@ -1,0 +1,14 @@
+[Unit]
+Description=SmartLife Primary HK2 Dashboard Static Site on 19367
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/smartlife-primary-hk2
+ExecStart=/home/ubuntu/smartlife-primary-hk2/.venv/bin/python -m http.server 19367 --bind 127.0.0.1 -d dashboard
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

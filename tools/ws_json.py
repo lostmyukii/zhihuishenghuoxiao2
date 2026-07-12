@@ -90,10 +90,11 @@ class WebSocketPeer:
 
 
 class JsonRelayServer:
-    def __init__(self, host: str, port: int, *, name: str) -> None:
+    def __init__(self, host: str, port: int, *, name: str, broadcast_incoming: bool = False) -> None:
         self.host = host
         self.port = port
         self.name = name
+        self.broadcast_incoming = broadcast_incoming
         self.incoming: asyncio.Queue[Dict[str, Any]] = asyncio.Queue()
         self.peers: Set[WebSocketPeer] = set()
         self.retained: Dict[str, str] = {}
@@ -133,6 +134,9 @@ class JsonRelayServer:
                 except json.JSONDecodeError:
                     payload = {"type": "raw", "text": text}
                 await self.incoming.put(payload)
+                if self.broadcast_incoming:
+                    retain = payload.get("type") in {"hello", "telemetry", "health"}
+                    await self.broadcast_json(payload, retain=retain)
         except (asyncio.IncompleteReadError, ConnectionError):
             pass
         finally:
