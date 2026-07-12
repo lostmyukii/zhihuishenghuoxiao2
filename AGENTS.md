@@ -47,6 +47,7 @@ git push origin main
 - 真实板必须输出 `hello/telemetry/health/ack` 类 JSON，不用静态占位数据冒充在线。
 - 同一套命令要被网页按钮、语音意图、8 键 AD 或本地按钮复用。
 - 小学组重点是四项任务闭环，不是越多模块越好。
+- MQ-2、水滴、火焰和 PIR 已纳入正式安全感知范围，不再作为可删减扩展。
 - MQTT 和可视化是展示增强，必须服务于真实硬件状态。
 
 ## 硬件合同
@@ -191,7 +192,7 @@ N16R8 USB -> HTTPS Dashboard Web Serial -> WSS Cloud Relay -> MQTT Broker -> oth
 
 1. 冻结硬件和协议合同。
 2. 固件实现最小闭环：`hello`、`telemetry`、`ack`、光照、DHT、PIR、学习灯、蜂鸣器。
-3. 增加安全扩展：MQ-2、水滴、火焰及 OLED/网页告警说明。
+3. 完成正式安全模块：MQ-2、水滴、火焰及 OLED/网页告警说明。
 4. 增加 8 键 AD，先标定再接入。
 5. 复用初中 Dashboard/Web Serial/WSS/MQTT 架构，改 topic 与 profile。
 6. 增加语音白名单。
