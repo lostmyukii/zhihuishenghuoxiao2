@@ -1,4 +1,4 @@
-const CACHE = "hk2-dashboard-v2-ch340";
+const CACHE = "hk2-dashboard-v3-polarity";
 const ASSETS = ["./", "./index.html", "./style.css", "./app.js", "./alert-core.js", "./energy-core.js", "./intent-core.js", "./serial-core.js"];
 
 self.addEventListener("install", (event) => event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS))));

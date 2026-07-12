@@ -8,8 +8,8 @@
 
   const meta = {
     mq2: { title: "烟雾／燃气风险", source: "MQ-2 · GPIO2", sensorKey: "mq2" },
-    flame: { title: "火源信号异常", source: "火焰 DO · GPIO11", sensorKey: "flame" },
-    water: { title: "检测到漏水", source: "水滴 · GPIO8", sensorKey: "water" },
+    flame: { title: "火源信号异常", source: "火焰 DO · GPIO11 · HIGH 触发", sensorKey: "flame" },
+    water: { title: "检测到漏水", source: "水滴 · GPIO8 · LOW 触发", sensorKey: "water" },
     intrusion: { title: "离家人体报警", source: "PIR · GPIO5", sensorKey: "pir" },
     noise: { title: "学习噪声提醒", source: "声音 · GPIO4", sensorKey: "sound" },
     temperature: { title: "学习温度提醒", source: "DHT11 · GPIO14", sensorKey: "temperature" },
@@ -30,7 +30,7 @@
     if (code === "temperature" && Number.isFinite(Number(sensors.temperature))) {
       return `当前 ${Number(sensors.temperature).toFixed(1)}°C，提醒阈值 ${Number(thresholds.temperature ?? 29).toFixed(1)}°C。`;
     }
-    if (code === "flame") return "火焰模块 DO/SIG 出现低电平，请人工确认；演示不用明火。";
+    if (code === "flame") return "火焰模块 DO/SIG 出现高电平，请人工确认；演示不用明火。";
     if (code === "water") return "水滴模块已触发，请检查厨卫区域。";
     if (code === "intrusion") return "离家模式下，玄关检测到人体活动。";
     return "设备上报了需要处理的状态。";

@@ -17,7 +17,7 @@ namespace {
 static const char PROJECT[] = "smartlife-primary-hk2";
 static const char PROFILE_ID[] = "smartlife-primary-safe-energy-home-v1";
 static const char BOARD_ID[] = "n16r8_esp32s3";
-static const char FIRMWARE_VERSION[] = "0.2.0";
+static const char FIRMWARE_VERSION[] = "0.2.1";
 static const int BAUD_RATE = 115200;
 static const unsigned long TELEMETRY_INTERVAL_MS = 1000;
 static const unsigned long FAST_SENSOR_INTERVAL_MS = 200;
@@ -37,6 +37,8 @@ static const uint8_t PIN_DHT = 14;
 static const uint8_t PIN_OLED_SDA = 41;
 static const uint8_t PIN_OLED_SCL = 42;
 static const uint8_t PIN_LAMP = 12;
+static const uint8_t WATER_ACTIVE_LEVEL = LOW;
+static const uint8_t FLAME_ACTIVE_LEVEL = HIGH;
 
 static const uint8_t BUZZER_CHANNEL = 1;
 static const uint8_t BUZZER_RESOLUTION = 8;
@@ -306,8 +308,8 @@ void readFastSensors() {
   sensors.sound = analogPercentFromRaw(sensors.soundRaw);
   sensors.mq2 = analogPercentFromRaw(sensors.mq2Raw);
   sensors.pir = digitalRead(PIN_PIR) == HIGH;
-  sensors.water = digitalRead(PIN_WATER) == HIGH;
-  sensors.flame = digitalRead(PIN_FLAME) == LOW;
+  sensors.water = digitalRead(PIN_WATER) == WATER_ACTIVE_LEVEL;
+  sensors.flame = digitalRead(PIN_FLAME) == FLAME_ACTIVE_LEVEL;
 }
 
 void readDhtSensor(unsigned long now) {
@@ -658,8 +660,8 @@ void setupPins() {
   pinMode(PIN_SOUND, INPUT);
   pinMode(PIN_MQ2, INPUT);
   pinMode(PIN_PIR, INPUT);
-  pinMode(PIN_WATER, INPUT);
-  pinMode(PIN_FLAME, INPUT_PULLUP);
+  pinMode(PIN_WATER, INPUT_PULLUP);
+  pinMode(PIN_FLAME, INPUT_PULLDOWN);
 
   pinMode(PIN_LAMP, OUTPUT);
   pinMode(PIN_BUZZER, OUTPUT);

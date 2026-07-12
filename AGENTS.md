@@ -60,8 +60,8 @@ git push origin main
 | MQ-2 AO | `GPIO2 / ADC2` | 厨房烟雾/燃气风险 |
 | Sound 声音 | `GPIO4 / ADC4` | 学习噪声提醒 |
 | PIR | `GPIO5 / D5` | 有人/无人、离家入侵 |
-| Flame 火焰模拟 | `GPIO11` 信号口 | `DO/SIG` 低电平触发，不用明火 |
-| Water 水滴 | `GPIO8 / D8` | 漏水提醒 |
+| Flame 火焰模拟 | `GPIO11` 信号口 | 实板标定为 `DO/SIG` 高电平触发，不用明火 |
+| Water 水滴 | `GPIO8 / D8` | 实板标定为低电平触发；高电平为干燥 |
 | Buzzer 蜂鸣器 | `GPIO13 / D13` | 短提醒与报警 |
 | DHT | `GPIO14 / D14` | 温湿度舒适判断 |
 | OLED | `SDA=GPIO41, SCL=GPIO42` | 本地数据显示 |

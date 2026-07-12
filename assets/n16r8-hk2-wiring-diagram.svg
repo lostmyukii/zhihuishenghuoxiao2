@@ -89,13 +89,13 @@
       <rect class="card" width="238" height="165" stroke="#78c38f"/>
       <path d="M119 29c-24 31-39 50-39 70a39 39 0 0 0 78 0c0-20-15-39-39-70z" fill="#82c6eb" stroke="#318bbd" stroke-width="4"/>
       <text x="119" y="120" text-anchor="middle" class="module-title">水滴 / 漏水传感器</text>
-      <text x="119" y="145" text-anchor="middle" class="gpio">GPIO8 / D8</text>
+      <text x="119" y="145" text-anchor="middle" class="gpio">GPIO8 / D8 · LOW 触发</text>
     </g>
     <g transform="translate(536,55)" filter="url(#shadow)">
       <rect class="card" width="238" height="165" stroke="#78c38f"/>
       <path d="M119 31c18 25 34 39 30 62-4 25-22 36-30 36s-27-11-31-36c-3-18 8-34 21-48 1 15 7 22 10 25 8-13 7-27 0-39z" fill="#ff845f" stroke="#d54f35" stroke-width="4"/>
       <text x="119" y="120" text-anchor="middle" class="module-title">火焰传感器（模拟）</text>
-      <text x="119" y="145" text-anchor="middle" class="gpio">DO/SIG → GPIO11</text>
+      <text x="119" y="145" text-anchor="middle" class="gpio">DO/SIG → GPIO11 · HIGH</text>
     </g>
     <text x="22" y="252" class="warning">安全：MQ-2 AO 必须限制在 0~3.3V；不用明火；异常通过蜂鸣器、OLED 与网页告警</text>
   </g>

@@ -81,11 +81,19 @@ class FirmwareContractTest(unittest.TestCase):
                     f"{name} must stay aligned with AGENTS.md and 开发文档.md",
                 )
 
-    def test_flame_sensor_uses_course_board_gpio11_active_low(self):
+    def test_flame_sensor_uses_real_board_gpio11_active_high(self):
         source = self.read_source()
 
-        self.assertIn("pinMode(PIN_FLAME, INPUT_PULLUP)", source)
-        self.assertIn("digitalRead(PIN_FLAME) == LOW", source)
+        self.assertIn("FLAME_ACTIVE_LEVEL = HIGH", source)
+        self.assertIn("pinMode(PIN_FLAME, INPUT_PULLDOWN)", source)
+        self.assertIn("digitalRead(PIN_FLAME) == FLAME_ACTIVE_LEVEL", source)
+
+    def test_water_sensor_uses_real_board_gpio8_active_low(self):
+        source = self.read_source()
+
+        self.assertIn("WATER_ACTIVE_LEVEL = LOW", source)
+        self.assertIn("pinMode(PIN_WATER, INPUT_PULLUP)", source)
+        self.assertIn("digitalRead(PIN_WATER) == WATER_ACTIVE_LEVEL", source)
 
     def test_removed_actuators_are_absent_from_firmware_contract(self):
         source = self.read_source()
